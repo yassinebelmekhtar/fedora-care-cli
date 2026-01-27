@@ -1,40 +1,40 @@
 # Fedora Care CLI
 
-Fedora Linux için terminal tabanlı bakım ve sistem izleme aracı.
+A terminal-based maintenance and system monitoring tool for Fedora Linux.
 
-## Kurulum
+## Installation
 
 ```bash
 pip install -e .
 ```
 
-## Komutlar
+## Commands
 
-| Komut | Açıklama |
-|-------|----------|
-| `fedcare health` | CPU, RAM, SWAP, disk, uptime ve boot süresi özeti |
-| `fedcare services` | Kritik systemd servislerinin durumu |
-| `fedcare network` | Ağ arayüzleri, DNS ve ping testi |
-| `fedcare logs` | Son hata/uyarı sayısı (journalctl) |
-| `fedcare updates` | Bekleyen DNF güncellemeleri |
-| `fedcare clean` | Cache/log temizliği (varsayılan dry-run) |
-| `fedcare backup` | Önemli config dosyalarını yedekler |
-| `fedcare startup` | Açılışta en yavaş servisler |
-| `fedcare report` | Health + Logs + Clean özet raporu |
+| Command | Description |
+|---------|-------------|
+| `fedcare health` | System health summary (CPU, RAM, SWAP, disk, uptime, boot time) |
+| `fedcare services` | Status of critical systemd services |
+| `fedcare network` | Network interfaces, DNS, and connectivity test |
+| `fedcare logs` | Recent error/warning counts from journalctl |
+| `fedcare updates` | List pending DNF updates |
+| `fedcare clean` | Cache/log cleanup (default: dry-run) |
+| `fedcare backup` | Backup important config files |
+| `fedcare startup` | Slowest services at boot |
+| `fedcare report` | Combined Health + Logs + Clean report |
 
-Her komut `--json` flagı ile JSON çıktısı destekler.
+Every command supports the `--json` flag for JSON output.
 
-## Kullanım
+## Usage
 
 ```bash
 fedcare health
 fedcare services --json
-fedcare backup --dest ~/yedek
+fedcare backup --dest ~/my-backup
 fedcare startup --top 15
 fedcare clean --apply
 ```
 
-## Gereksinimler
+## Requirements
 
 - Fedora Linux
 - Python 3.10+

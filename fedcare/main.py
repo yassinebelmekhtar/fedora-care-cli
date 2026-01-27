@@ -25,15 +25,15 @@ def run_root(cmd):
     return (r.stdout or r.stderr or "").strip()
 
 
-@click.group(help="Fedora bakım & hız kontrol aracı")
+@click.group(help="Fedora maintenance & system monitoring tool")
 def cli():
     pass
 
 
 @cli.command()
-@click.option("--json", "as_json", is_flag=True, help="Çıktıyı JSON formatında ver.")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def health(as_json):
-    """Sistem sağlığı özetini gösterir."""
+    """Show system health summary."""
     cpu_percent = psutil.cpu_percent(interval=0.5)
     load1, load5, load15 = psutil.getloadavg()
 
@@ -46,7 +46,7 @@ def health(as_json):
     uptime_h = uptime_sec // 3600
     uptime_m = (uptime_sec % 3600) // 60
 
-    systemd_analyze = run(["systemd-analyze"]) or "systemd-analyze okunamadı"
+    systemd_analyze = run(["systemd-analyze"]) or "Could not read systemd-analyze"
 
     data = {
         "cpu_percent": cpu_percent,
@@ -63,25 +63,25 @@ def health(as_json):
         return
 
     t = Table(title="Fedora Care • Health", show_lines=True)
-    t.add_column("Alan", style="bold")
-    t.add_column("Değer")
+    t.add_column("Field", style="bold")
+    t.add_column("Value")
 
-    t.add_row("CPU Kullanımı", f"%{cpu_percent}")
+    t.add_row("CPU Usage", f"{cpu_percent}%")
     t.add_row("Load Avg", f"{load1:.2f} / {load5:.2f} / {load15:.2f}")
-    t.add_row("RAM", f"%{vm.percent}  ({gb(vm.used)} / {gb(vm.total)} GB)")
-    t.add_row("SWAP", f"%{swap.percent} ({gb(swap.used)} / {gb(swap.total)} GB)")
-    t.add_row("Disk /", f"{gb(du.used)} / {gb(du.total)} GB  (Boş: {gb(du.free)} GB)")
-    t.add_row("Uptime", f"{uptime_h} saat {uptime_m} dk")
-    t.add_row("Boot Süresi", systemd_analyze)
+    t.add_row("RAM", f"{vm.percent}%  ({gb(vm.used)} / {gb(vm.total)} GB)")
+    t.add_row("SWAP", f"{swap.percent}% ({gb(swap.used)} / {gb(swap.total)} GB)")
+    t.add_row("Disk /", f"{gb(du.used)} / {gb(du.total)} GB  (Free: {gb(du.free)} GB)")
+    t.add_row("Uptime", f"{uptime_h}h {uptime_m}m")
+    t.add_row("Boot Time", systemd_analyze)
 
     print(t)
 
 
 @cli.command()
-@click.option("--since", default="10m", show_default=True, help="Zaman aralığı (örn: 10m, 1h, 1d)")
-@click.option("--json", "as_json", is_flag=True, help="Çıktıyı JSON formatında ver.")
+@click.option("--since", default="10m", show_default=True, help="Time range (e.g. 10m, 1h, 1d)")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def logs(since, as_json):
-    """Son hata/uyarı sayısını gösterir."""
+    """Show recent error/warning counts."""
     err = run(["journalctl", "--since", since, "-p", "err", "--no-pager"])
     warn = run(["journalctl", "--since", since, "-p", "warning", "--no-pager"])
 
@@ -94,29 +94,29 @@ def logs(since, as_json):
         print(json.dumps(data, ensure_ascii=False, indent=2))
         return
 
-    t = Table(title=f"Logs • Son {since}", show_lines=True)
-    t.add_column("Seviye", style="bold")
-    t.add_column("Adet")
+    t = Table(title=f"Logs • Last {since}", show_lines=True)
+    t.add_column("Level", style="bold")
+    t.add_column("Count")
     t.add_row("ERROR", str(err_count))
     t.add_row("WARNING", str(warn_count))
     print(t)
 
     if err_count == 0 and warn_count == 0:
-        print("[bold green]Temiz görünüyor ✅[/bold green]")
+        print("[bold green]All clear ✅[/bold green]")
     else:
-        print("[bold yellow]Detay görmek için:[/bold yellow]")
+        print("[bold yellow]For details:[/bold yellow]")
         print(f"  journalctl --since {since} -p err")
         print(f"  journalctl --since {since} -p warning")
 
 
 @cli.command()
-@click.option("--apply", is_flag=True, help="Gerçekten uygula (sudo ister).")
-@click.option("--json", "as_json", is_flag=True, help="Çıktıyı JSON formatında ver.")
+@click.option("--apply", is_flag=True, help="Actually apply (requires sudo).")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def clean(apply, as_json):
-    """Cache/log temizliği (varsayılan: dry-run)."""
+    """Cache/log cleanup (default: dry-run)."""
     actions = [
-        {"name": "DNF cache temizliği", "command": ["dnf", "clean", "all"]},
-        {"name": "Eski journal loglarını küçült (1 hafta)", "command": ["journalctl", "--vacuum-time=7d"]},
+        {"name": "DNF cache cleanup", "command": ["dnf", "clean", "all"]},
+        {"name": "Trim old journal logs (1 week)", "command": ["journalctl", "--vacuum-time=7d"]},
     ]
 
     if as_json:
@@ -126,15 +126,14 @@ def clean(apply, as_json):
         }
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         if apply:
-            # JSON modunda da uygulasın istiyorsan uygular; istemiyorsan apply kullanmazsın zaten.
             for a in actions:
                 run_root(a["command"])
         return
 
     t = Table(title="Clean • Plan", show_lines=True)
-    t.add_column("İşlem", style="bold")
-    t.add_column("Komut")
-    t.add_column("Mod")
+    t.add_column("Action", style="bold")
+    t.add_column("Command")
+    t.add_column("Mode")
 
     for a in actions:
         t.add_row(a["name"], " ".join(a["command"]), "APPLY" if apply else "DRY-RUN")
@@ -142,24 +141,24 @@ def clean(apply, as_json):
     print(t)
 
     if not apply:
-        print("\n[bold yellow]Dry-run:[/bold yellow] Hiçbir şey silinmedi.")
-        print("Uygulamak istersen: [bold]fedcare clean --apply[/bold]")
+        print("\n[bold yellow]Dry-run:[/bold yellow] Nothing was deleted.")
+        print("To apply: [bold]fedcare clean --apply[/bold]")
         return
 
-    print("\n[bold]Uygulanıyor (sudo isteyebilir)...[/bold]")
+    print("\n[bold]Applying (may require sudo)...[/bold]")
     for a in actions:
         print(f"\n[bold]{a['name']}[/bold]")
         out = run_root(a["command"])
         print(out if out else "OK")
 
-    print("\n[bold green]Temizlik tamam ✅[/bold green]")
+    print("\n[bold green]Cleanup complete ✅[/bold green]")
 
 
 @cli.command()
-@click.option("--since", default="10m", show_default=True, help="Log zaman aralığı")
-@click.option("--json", "as_json", is_flag=True, help="Çıktıyı JSON formatında ver.")
+@click.option("--since", default="10m", show_default=True, help="Log time range")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def report(since, as_json):
-    """Health + Logs + Clean planını tek seferde gösterir."""
+    """Show Health + Logs + Clean plan at once."""
     # --- health ---
     cpu_percent = psutil.cpu_percent(interval=0.5)
     load1, load5, load15 = psutil.getloadavg()
@@ -180,8 +179,8 @@ def report(since, as_json):
 
     # --- clean plan ---
     clean_actions = [
-        {"name": "DNF cache temizliği", "command": "dnf clean all"},
-        {"name": "Eski journal loglarını küçült (1 hafta)", "command": "journalctl --vacuum-time=7d"},
+        {"name": "DNF cache cleanup", "command": "dnf clean all"},
+        {"name": "Trim old journal logs (1 week)", "command": "journalctl --vacuum-time=7d"},
     ]
 
     if as_json:
@@ -202,19 +201,19 @@ def report(since, as_json):
         return
 
     t = Table(title="Fedora Care • Full Report", show_lines=True)
-    t.add_column("Kategori", style="bold")
-    t.add_column("Alan", style="bold")
-    t.add_column("Değer")
+    t.add_column("Category", style="bold")
+    t.add_column("Field", style="bold")
+    t.add_column("Value")
 
-    t.add_row("Health", "CPU", f"%{cpu_percent}")
+    t.add_row("Health", "CPU", f"{cpu_percent}%")
     t.add_row("Health", "Load Avg", f"{load1:.2f} / {load5:.2f} / {load15:.2f}")
-    t.add_row("Health", "RAM", f"%{vm.percent}  ({gb(vm.used)} / {gb(vm.total)} GB)")
-    t.add_row("Health", "SWAP", f"%{swap.percent} ({gb(swap.used)} / {gb(swap.total)} GB)")
-    t.add_row("Health", "Disk /", f"{gb(du.used)} / {gb(du.total)} GB  (Boş: {gb(du.free)} GB)")
-    t.add_row("Health", "Uptime", f"{uptime_h} saat {uptime_m} dk")
+    t.add_row("Health", "RAM", f"{vm.percent}%  ({gb(vm.used)} / {gb(vm.total)} GB)")
+    t.add_row("Health", "SWAP", f"{swap.percent}% ({gb(swap.used)} / {gb(swap.total)} GB)")
+    t.add_row("Health", "Disk /", f"{gb(du.used)} / {gb(du.total)} GB  (Free: {gb(du.free)} GB)")
+    t.add_row("Health", "Uptime", f"{uptime_h}h {uptime_m}m")
     t.add_row("Health", "Boot", systemd_analyze)
-    t.add_row("Logs", f"Errors (son {since})", str(err_count))
-    t.add_row("Logs", f"Warnings (son {since})", str(warn_count))
+    t.add_row("Logs", f"Errors (last {since})", str(err_count))
+    t.add_row("Logs", f"Warnings (last {since})", str(warn_count))
     for a in clean_actions:
         t.add_row("Clean", a["name"], f"[dim]{a['command']}[/dim]  (dry-run)")
 
@@ -222,9 +221,9 @@ def report(since, as_json):
 
 
 @cli.command()
-@click.option("--json", "as_json", is_flag=True, help="Çıktıyı JSON formatında ver.")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def services(as_json):
-    """Kritik systemd servislerinin durumunu gösterir."""
+    """Show status of critical systemd services."""
     svc_list = ["NetworkManager", "firewalld", "sshd", "crond", "bluetooth", "docker"]
     results = []
     for svc in svc_list:
@@ -238,8 +237,8 @@ def services(as_json):
         return
 
     t = Table(title="Fedora Care • Services", show_lines=True)
-    t.add_column("Servis", style="bold")
-    t.add_column("Durum")
+    t.add_column("Service", style="bold")
+    t.add_column("Status")
     for s in results:
         color = "green" if s["status"] == "active" else "red" if s["status"] == "inactive" else "dim"
         t.add_row(s["name"], f"[{color}]{s['status']}[/{color}]")
@@ -247,9 +246,9 @@ def services(as_json):
 
 
 @cli.command()
-@click.option("--json", "as_json", is_flag=True, help="Çıktıyı JSON formatında ver.")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def network(as_json):
-    """Ağ bilgisi ve bağlantı testi."""
+    """Show network info and connectivity test."""
     # Interfaces
     ifaces = {}
     for iface, addrs in psutil.net_if_addrs().items():
@@ -286,20 +285,20 @@ def network(as_json):
         return
 
     t = Table(title="Fedora Care • Network", show_lines=True)
-    t.add_column("Alan", style="bold")
-    t.add_column("Değer")
+    t.add_column("Field", style="bold")
+    t.add_column("Value")
     for iface, ips in ifaces.items():
-        t.add_row(f"Arayüz: {iface}", ", ".join(ips))
-    t.add_row("DNS", ", ".join(dns_servers) if dns_servers else "Bulunamadı")
+        t.add_row(f"Interface: {iface}", ", ".join(ips))
+    t.add_row("DNS", ", ".join(dns_servers) if dns_servers else "Not found")
     t.add_row("Ping 8.8.8.8", "[green]OK[/green]" if ping_ip_ok else "[red]FAIL[/red]")
     t.add_row("Ping google.com", "[green]OK[/green]" if ping_dns_ok else "[red]FAIL[/red]")
     print(t)
 
 
 @cli.command()
-@click.option("--json", "as_json", is_flag=True, help="Çıktıyı JSON formatında ver.")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def updates(as_json):
-    """Bekleyen DNF güncellemelerini listeler."""
+    """List pending DNF updates."""
     r = subprocess.run(
         ["dnf", "check-update", "--quiet"],
         capture_output=True, text=True, check=False,
@@ -322,20 +321,20 @@ def updates(as_json):
         return
 
     t = Table(title="Fedora Care • Updates", show_lines=True)
-    t.add_column("Paket", style="bold")
-    t.add_column("Mevcut Sürüm")
-    t.add_column("Yeni Sürüm")
+    t.add_column("Package", style="bold")
+    t.add_column("Current Version")
+    t.add_column("New Version")
     for p in packages:
         t.add_row(p["name"], p["current"], p["new"])
     print(t)
-    print(f"\nToplam [bold]{len(packages)}[/bold] güncelleme bekliyor.")
+    print(f"\n[bold]{len(packages)}[/bold] pending update(s).")
 
 
 @cli.command()
-@click.option("--dest", default=None, help="Yedek hedef dizini.")
-@click.option("--json", "as_json", is_flag=True, help="Çıktıyı JSON formatında ver.")
+@click.option("--dest", default=None, help="Backup destination directory.")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def backup(dest, as_json):
-    """Önemli config dosyalarını yedekler."""
+    """Backup important config files."""
     if dest is None:
         dest = os.path.join(
             Path.home(), "fedcare-backup", datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -364,9 +363,9 @@ def backup(dest, as_json):
                 shutil.copy2(src, dst)
                 results.append({"path": src, "status": "OK"})
             else:
-                results.append({"path": src, "status": "Bulunamadı"})
+                results.append({"path": src, "status": "Not found"})
         except PermissionError:
-            results.append({"path": src, "status": "İzin hatası"})
+            results.append({"path": src, "status": "Permission denied"})
         except Exception as e:
             results.append({"path": src, "status": str(e)})
 
@@ -375,8 +374,8 @@ def backup(dest, as_json):
         return
 
     t = Table(title=f"Fedora Care • Backup → {dest}", show_lines=True)
-    t.add_column("Dosya", style="bold")
-    t.add_column("Durum")
+    t.add_column("File", style="bold")
+    t.add_column("Status")
     for r in results:
         color = "green" if r["status"] == "OK" else "red"
         t.add_row(r["path"], f"[{color}]{r['status']}[/{color}]")
@@ -384,10 +383,10 @@ def backup(dest, as_json):
 
 
 @cli.command()
-@click.option("--top", "top_n", default=10, show_default=True, help="Gösterilecek servis sayısı.")
-@click.option("--json", "as_json", is_flag=True, help="Çıktıyı JSON formatında ver.")
+@click.option("--top", "top_n", default=10, show_default=True, help="Number of services to show.")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def startup(top_n, as_json):
-    """Açılışta en yavaş servisleri gösterir."""
+    """Show slowest services at boot."""
     output = run(["systemd-analyze", "blame", "--no-pager"])
     items = []
     for line in output.splitlines():
@@ -405,9 +404,9 @@ def startup(top_n, as_json):
         return
 
     t = Table(title=f"Fedora Care • Startup (Top {top_n})", show_lines=True)
-    t.add_column("Sıra", style="bold", justify="right")
-    t.add_column("Servis")
-    t.add_column("Süre")
+    t.add_column("Rank", style="bold", justify="right")
+    t.add_column("Service")
+    t.add_column("Time")
     for i, item in enumerate(items, 1):
         t.add_row(str(i), item["service"], item["time"])
     print(t)

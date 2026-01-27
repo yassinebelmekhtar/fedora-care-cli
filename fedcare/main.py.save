@@ -1,0 +1,73 @@
+cat > fedcare/main.py <<'PY'
+import shutil
+from datetime import datetime
+
+import click
+import psutil
+from rich import print
+from rich.table import Table
+
+
+def gb(n: int) -> float:
+    return round(n / (1024**3), 2)
+
+
+@click.group(help="Fedora bakım & hız kontrol aracı")
+def cli():
+    pass
+
+
+@cli.command()
+def health():
+    """Sistem sağlığı özetini gösterir."""
+    # CPU
+    cpu_percent = psutil.cpu_percent(interval=0.5)
+    load1, load5, load15 = psutil.getloadavg()
+
+    # RAM / SWAP
+    vm = psutil.virtual_memory()
+    swap = psutil.swap_memory()
+
+    # Disk (root)
+    du = shutil.disk_usage("/")
+
+    # Uptime
+    boot = datetime.fromtimestamp(psutil.boot_time())
+    uptime_sec = int((datetime.now() - boot).total_seconds())
+    uptime_h = uptime_sec // 3600
+    uptime_m = (uptime_sec % 3600) // 60
+
+    # Table
+    t = Table(title="Fedora Care • Health", show_lines=True)
+    t.add_column("Alan", style="bold")
+    t.add_column("Değer")
+
+    t.add_row("CPU Kullanımı", f"%{cpu_percent}")
+    t.add_row("Load Avg", f"{load1:.2f} / {load5:.2f} / {load15:.2f}")
+    t.add_row("RAM", f"%{vm.percent}  ({gb(vm.used)} / {gb(vm.total)} GB)")
+    t.add_row("SWAP", f"%{swap.percent} ({gb(swap.used)} / {gb(swap.total)} GB)")
+    t.add_row("Disk /", f"{gb(du.used)} / {gb(du.total)} GB  (Boş: {gb(du.free)} GB)")
+    t.add_row("Uptime", f"{uptime_h} saat {uptime_m} dk")
+
+    print(t)
+
+    # Mini öneriler
+    tips = []
+    if vm.percent >= 85:
+        tips.append("RAM çok yüksek: arka plan uygulamalarını kapat / sekmeleri azalt.")
+    if du.free / du.total < 0.10:
+        tips.append("Disk çok dolu: cache/log temizliği iyi olur.")
+    if cpu_percent >= 85:
+        tips.append("CPU yüksek: hangi süreçler yiyor bak (top/htop).")
+
+    if tips:
+        print("\n[bold yellow]Öneriler:[/bold yellow]")
+        for x in tips:
+            print(f" • {x}")
+    else:
+        print("\n[bold green]Durum iyi görünüyor ✅[/bold green]")
+
+
+if __name__ == "__main__":
+    cli()
+PY
