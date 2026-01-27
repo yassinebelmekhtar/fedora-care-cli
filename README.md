@@ -24,6 +24,50 @@ pip install -e .
 
 Every command supports the `--json` flag for JSON output.
 
+## Example Output
+
+### `fedcare health`
+```
+┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Field     ┃ Value                                             ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ CPU Usage │ 4.9%                                              │
+│ Load Avg  │ 0.42 / 0.77 / 0.96                                │
+│ RAM       │ 52.6%  (7.31 / 14.95 GB)                          │
+│ SWAP      │ 0.0% (0.0 / 8.0 GB)                               │
+│ Disk /    │ 15.86 / 474.35 GB  (Free: 457.47 GB)              │
+│ Uptime    │ 11h 17m                                           │
+│ Boot Time │ Startup finished in 19.446s                       │
+└───────────┴───────────────────────────────────────────────────┘
+```
+
+### `fedcare services`
+```
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
+┃ Service        ┃ Status   ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
+│ NetworkManager │ active   │
+│ firewalld      │ active   │
+│ sshd           │ inactive │
+│ crond          │ active   │
+│ bluetooth      │ active   │
+│ docker         │ inactive │
+└────────────────┴──────────┘
+```
+
+### `fedcare network`
+```
+┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Field           ┃ Value        ┃
+┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ Interface: lo   │ 127.0.0.1    │
+│ Interface: wlo1 │ 192.168.1.21 │
+│ DNS             │ 127.0.0.53   │
+│ Ping 8.8.8.8    │ OK           │
+│ Ping google.com │ OK           │
+└─────────────────┴──────────────┘
+```
+
 ## Usage
 
 ```bash
