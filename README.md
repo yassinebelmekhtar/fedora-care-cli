@@ -1,6 +1,8 @@
 # Fedora Care CLI
 
-A terminal-based maintenance and system monitoring tool for Fedora Linux.
+A terminal-based maintenance and system monitoring tool for Fedora Linux. Check system health, monitor systemd services, test network connectivity, list pending DNF updates, backup config files, and analyze boot performance — all from a single command.
+
+**Features:** CPU/RAM/disk monitoring, systemd service status, network diagnostics, journalctl log analysis, DNF update checker, config file backup, boot time analysis, full system report. All commands support `--json` output for scripting and automation.
 
 ## Installation
 
