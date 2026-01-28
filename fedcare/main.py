@@ -25,7 +25,7 @@ def run_root(cmd):
     return (r.stdout or r.stderr or "").strip()
 
 
-@click.group(help="Fedora maintenance & system monitoring tool")
+@click.group(name="fedcare", help="Fedora maintenance & system monitoring tool")
 def cli():
     pass
 
