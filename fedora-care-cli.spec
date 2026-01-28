@@ -1,5 +1,5 @@
 Name:           fedora-care-cli
-Version:        1.0.0
+Version:        1.1.0
 Release:        1%{?dist}
 Summary:        Fedora Linux maintenance and system monitoring CLI tool
 
@@ -43,5 +43,8 @@ machine-readable JSON.
 %{_bindir}/fedcare
 
 %changelog
-* Wed Jan 28 2026 selinihtyr <selinihtyr@fedoraproject.org> - 1.0.0-1
+* Tue Jan 28 2026 selinihtyr <selinihtyr@fedoraproject.org> - 1.1.0-1
+- Add restore command to recover config files from backups
+
+* Tue Jan 28 2026 selinihtyr <selinihtyr@fedoraproject.org> - 1.0.0-1
 - Initial RPM package release
