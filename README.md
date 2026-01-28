@@ -33,6 +33,8 @@ fedcare updates      # Pending DNF updates
 fedcare clean        # Cleanup plan (dry-run)
 fedcare clean --apply  # Execute cleanup
 fedcare backup       # Backup config files
+fedcare restore --list    # List available backups
+fedcare restore --latest  # Restore from latest backup
 fedcare startup      # Slowest boot services
 fedcare report       # Full system report
 ```
@@ -54,6 +56,7 @@ fedcare health --json
 | `fedcare updates` | List pending DNF updates |
 | `fedcare clean` | Cache/log cleanup (default: dry-run) |
 | `fedcare backup` | Backup important config files |
+| `fedcare restore` | Restore config files from backup |
 | `fedcare startup` | Slowest services at boot |
 | `fedcare report` | Combined Health + Logs + Clean report |
 

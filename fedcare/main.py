@@ -383,6 +383,133 @@ def backup(dest, as_json):
 
 
 @cli.command()
+@click.option("--list", "list_backups", is_flag=True, help="List available backups.")
+@click.option("--latest", is_flag=True, help="Restore from the most recent backup.")
+@click.option("--source", default=None, help="Backup directory to restore from.")
+@click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
+def restore(list_backups, latest, source, as_json):
+    """Restore config files from a backup."""
+    backup_base = os.path.join(Path.home(), "fedcare-backup")
+
+    # List available backups
+    if list_backups:
+        if not os.path.isdir(backup_base):
+            if as_json:
+                print(json.dumps({"backups": [], "message": "No backups found"}, ensure_ascii=False, indent=2))
+            else:
+                print("[yellow]No backups found.[/yellow]")
+            return
+
+        backups = sorted(
+            [d for d in os.listdir(backup_base) if os.path.isdir(os.path.join(backup_base, d))],
+            reverse=True
+        )
+
+        if as_json:
+            backup_info = []
+            for b in backups:
+                path = os.path.join(backup_base, b)
+                file_count = sum(len(files) for _, _, files in os.walk(path))
+                backup_info.append({"name": b, "path": path, "files": file_count})
+            print(json.dumps({"backups": backup_info}, ensure_ascii=False, indent=2))
+            return
+
+        if not backups:
+            print("[yellow]No backups found.[/yellow]")
+            return
+
+        t = Table(title="Fedora Care • Available Backups", show_lines=True)
+        t.add_column("Backup", style="bold")
+        t.add_column("Path")
+        t.add_column("Files")
+        for b in backups:
+            path = os.path.join(backup_base, b)
+            file_count = sum(len(files) for _, _, files in os.walk(path))
+            t.add_row(b, path, str(file_count))
+        print(t)
+        print(f"\nTo restore: [bold]fedcare restore --source {backups[0]}[/bold]")
+        return
+
+    # Determine source directory
+    if latest:
+        if not os.path.isdir(backup_base):
+            print("[red]No backups found.[/red]")
+            return
+        backups = sorted(
+            [d for d in os.listdir(backup_base) if os.path.isdir(os.path.join(backup_base, d))],
+            reverse=True
+        )
+        if not backups:
+            print("[red]No backups found.[/red]")
+            return
+        source = backups[0]
+
+    if source is None:
+        if as_json:
+            print(json.dumps({"error": "No source specified. Use --list, --latest, or --source"}, ensure_ascii=False, indent=2))
+        else:
+            print("[red]No source specified.[/red]")
+            print("Usage:")
+            print("  fedcare restore --list              # List available backups")
+            print("  fedcare restore --latest            # Restore from most recent")
+            print("  fedcare restore --source BACKUP     # Restore from specific backup")
+        return
+
+    # Resolve full path
+    if os.path.isabs(source):
+        source_path = source
+    else:
+        source_path = os.path.join(backup_base, source)
+
+    if not os.path.isdir(source_path):
+        if as_json:
+            print(json.dumps({"error": f"Backup not found: {source_path}"}, ensure_ascii=False, indent=2))
+        else:
+            print(f"[red]Backup not found: {source_path}[/red]")
+        return
+
+    # Restore files
+    results = []
+    for root, dirs, files in os.walk(source_path):
+        for f in files:
+            src_file = os.path.join(root, f)
+            rel_path = os.path.relpath(src_file, source_path)
+            dst_file = "/" + rel_path
+
+            try:
+                os.makedirs(os.path.dirname(dst_file), exist_ok=True)
+                shutil.copy2(src_file, dst_file)
+                results.append({"file": dst_file, "status": "OK"})
+            except PermissionError:
+                # Try with sudo
+                cp_result = subprocess.run(
+                    ["sudo", "cp", "-p", src_file, dst_file],
+                    capture_output=True, text=True, check=False
+                )
+                if cp_result.returncode == 0:
+                    results.append({"file": dst_file, "status": "OK (sudo)"})
+                else:
+                    results.append({"file": dst_file, "status": "Permission denied"})
+            except Exception as e:
+                results.append({"file": dst_file, "status": str(e)})
+
+    if as_json:
+        print(json.dumps({"source": source_path, "restored": results}, ensure_ascii=False, indent=2))
+        return
+
+    t = Table(title=f"Fedora Care • Restore ← {source_path}", show_lines=True)
+    t.add_column("File", style="bold")
+    t.add_column("Status")
+    for r in results:
+        color = "green" if "OK" in r["status"] else "red"
+        t.add_row(r["file"], f"[{color}]{r['status']}[/{color}]")
+    print(t)
+
+    ok_count = sum(1 for r in results if "OK" in r["status"])
+    print(f"\n[bold green]{ok_count}/{len(results)}[/bold green] files restored.")
+
+
+@cli.command()
 @click.option("--top", "top_n", default=10, show_default=True, help="Number of services to show.")
 @click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def startup(top_n, as_json):
