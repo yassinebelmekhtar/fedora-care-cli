@@ -224,7 +224,7 @@ def report(since, as_json):
 @click.option("--json", "as_json", is_flag=True, help="Output in JSON format.")
 def services(as_json):
     """Show status of critical systemd services."""
-    svc_list = ["NetworkManager", "firewalld", "sshd", "crond", "bluetooth", "docker"]
+    svc_list = ["NetworkManager", "firewalld", "sshd", "crond", "bluetooth"]
     results = []
     for svc in svc_list:
         status = run(["systemctl", "is-active", svc])
