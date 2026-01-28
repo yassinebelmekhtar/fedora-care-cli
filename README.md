@@ -6,6 +6,15 @@ A terminal-based maintenance and system monitoring tool for Fedora Linux. Check 
 
 ## Installation
 
+### Via DNF (Recommended)
+
+```bash
+sudo dnf copr enable selinbtw/fedcare
+sudo dnf install fedora-care-cli
+```
+
+### Via pip
+
 ```bash
 pip install -e .
 ```
@@ -26,49 +35,25 @@ pip install -e .
 
 Every command supports the `--json` flag for JSON output.
 
-## Example Output
+## Screenshots
 
 ### `fedcare health`
-```
-┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Field     ┃ Value                                             ┃
-┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ CPU Usage │ 4.9%                                              │
-│ Load Avg  │ 0.42 / 0.77 / 0.96                                │
-│ RAM       │ 52.6%  (7.31 / 14.95 GB)                          │
-│ SWAP      │ 0.0% (0.0 / 8.0 GB)                               │
-│ Disk /    │ 15.86 / 474.35 GB  (Free: 457.47 GB)              │
-│ Uptime    │ 11h 17m                                           │
-│ Boot Time │ Startup finished in 19.446s                       │
-└───────────┴───────────────────────────────────────────────────┘
-```
+![health](screenshots/health.png)
 
-### `fedcare services`
-```
-┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
-┃ Service        ┃ Status   ┃
-┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
-│ NetworkManager │ active   │
-│ firewalld      │ active   │
-│ sshd           │ inactive │
-│ crond          │ active   │
-│ bluetooth      │ active   │
-│ docker         │ inactive │
-└────────────────┴──────────┘
-```
+### `fedcare services` & `fedcare startup`
+![services-startup](screenshots/services-startup.png)
 
-### `fedcare network`
-```
-┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
-┃ Field           ┃ Value        ┃
-┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
-│ Interface: lo   │ 127.0.0.1    │
-│ Interface: wlo1 │ 192.168.1.21 │
-│ DNS             │ 127.0.0.53   │
-│ Ping 8.8.8.8    │ OK           │
-│ Ping google.com │ OK           │
-└─────────────────┴──────────────┘
-```
+### `fedcare network` & `fedcare logs`
+![network-logs](screenshots/network-logs.png)
+
+### `fedcare updates`
+![updates](screenshots/updates.png)
+
+### `fedcare clean` & `fedcare clean --apply`
+![clean](screenshots/clean.png)
+
+### `fedcare report`
+![report](screenshots/report.png)
 
 ## Usage
 
