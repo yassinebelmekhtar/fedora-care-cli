@@ -13,5 +13,8 @@ dependencies = [
     "rich>=13.0",
 ]
 
+[tool.setuptools]
+packages = ["fedcare"]
+
 [project.scripts]
 fedcare = "fedcare.main:cli"
